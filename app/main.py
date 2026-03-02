@@ -3,17 +3,16 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.models import FrameInfo, FrameResult, SearchResult, SourceInfo, SubmissionRecord, SubmissionStatus
 from app.middleware import RateLimitMiddleware
+from app.models import FrameInfo, FrameResult, SearchResult, SourceInfo, SubmissionRecord, SubmissionStatus
 from app.security import require_api_key
 from app.services.dedupe import dedupe_frames
 from app.services.downloader import download_video
@@ -49,7 +48,7 @@ async def _shutdown() -> None:
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _submission_path(submission_id: str) -> Path:

@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Optional
-
 import httpx
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
@@ -17,7 +14,7 @@ DATE_META_KEYS = [
 ]
 
 
-async def infer_published_at(url: str, timeout_s: float = 6.0) -> Optional[str]:
+async def infer_published_at(url: str, timeout_s: float = 6.0) -> str | None:
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=timeout_s) as client:
             r = await client.get(url)
