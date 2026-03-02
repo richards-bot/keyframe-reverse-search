@@ -1,18 +1,28 @@
-# Keyframe Reverse Search (MVP)
+# Keyframe Reverse Search
 
-Web app + REST API to:
+Production-oriented web app + REST API to:
 1. ingest video (URL or upload),
 2. extract scene-change keyframes with FFmpeg,
 3. dedupe frames with perceptual hash,
 4. run reverse-image search engines in parallel,
-5. rank by earliest publication date,
-6. produce shareable report + JSON/PDF exports.
+5. rank by earliest publication evidence,
+6. publish shareable report + JSON/PDF exports.
 
 ## Stack
-- FastAPI (backend + API)
-- Vanilla HTML/CSS/JS (frontend)
-- FFmpeg + yt-dlp
+- FastAPI + async workers
+- Vanilla HTML/CSS/JS frontend
+- FFmpeg + yt-dlp pipeline
 - pHash via `imagehash`
+
+## Current production features
+- Typed API/domain models (Pydantic)
+- Worker queue abstraction (`InMemoryJobQueue` for now)
+- Robust partial-failure handling per reverse-search provider
+- API key auth support (optional) via `X-API-Key`
+- In-process rate limiting middleware
+- Upload size limits
+- Health/readiness probes: `/healthz`, `/readyz`
+- CI with lint + tests
 
 ## Quick start
 
@@ -22,12 +32,33 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# fill any API keys you have
+# fill keys as needed
 set -a; source .env; set +a
 uvicorn app.main:app --reload
 ```
 
 Open http://localhost:8000
+
+## Environment variables
+
+```bash
+# Engine keys
+GOOGLE_VISION_API_KEY=
+TINEYE_API_URL=
+TINEYE_API_USER=
+TINEYE_API_KEY=
+SERPAPI_KEY=
+
+# App/runtime
+APP_NAME=Keyframe Reverse Search
+APP_ENV=dev
+LOG_LEVEL=INFO
+QUEUE_WORKERS=2
+MAX_UPLOAD_MB=300
+RATE_LIMIT_REQUESTS=30
+RATE_LIMIT_WINDOW_SECONDS=60
+API_KEY=
+```
 
 ## API
 
@@ -35,6 +66,7 @@ Open http://localhost:8000
 `POST /api/submissions` (multipart form)
 - `url` (optional)
 - `file` (optional)
+- Requires `X-API-Key` header only when `API_KEY` is configured
 
 Returns `{ id, statusUrl }`
 
@@ -47,14 +79,20 @@ Returns `{ id, statusUrl }`
 ### Export
 - `GET /api/submissions/{id}/export.json`
 - `GET /api/submissions/{id}/export.pdf`
+(Protected by `X-API-Key` when configured)
 
-## Engine support
-- Google Vision: implemented via `GOOGLE_VISION_API_KEY`
-- TinEye: implemented via API credentials
-- Yandex: implemented through SerpAPI fallback (`SERPAPI_KEY`) because Yandex does not provide a stable official reverse-image API.
+## Running tests + lint
 
-## Notes
-- FFmpeg scene extraction currently uses `select='gt(scene,0.3)'`; tune threshold for your content.
-- Timestamp is approximate (index-based) in MVP; can be upgraded with ffprobe/frame metadata parsing.
-- Date extraction uses page meta tags and JSON-LD heuristics.
-- Submission storage is local filesystem (`data/submissions`).
+```bash
+ruff check .
+pytest -q
+```
+
+## Queue strategy
+Current queue is in-memory for simplicity. For durable production workers use Redis/RQ/Celery or SQS-based workers.
+See: `docs/job_queue_strategy.md`.
+
+## Important caveats
+- Yandex does not provide a stable official reverse-image API; current adapter is a pragmatic bridge path.
+- Earliest publication date is evidence-based inference and should be presented with confidence levels.
+- Filesystem submission storage should migrate to object storage + DB for large-scale use.
