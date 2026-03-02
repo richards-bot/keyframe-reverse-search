@@ -88,6 +88,21 @@ ruff check .
 pytest -q
 ```
 
+## CI/CD
+GitHub Actions now runs:
+- lint + tests
+- Docker image build
+- image push to GHCR on `main`
+- optional SSH deploy on `main`
+
+Set these repository secrets to enable deploy:
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `GHCR_PAT` (read access to GHCR on target host)
+
+On the server, create `/opt/keyframe-reverse-search/.env` for runtime env vars.
+
 ## Queue strategy
 Current queue is in-memory for simplicity. For durable production workers use Redis/RQ/Celery or SQS-based workers.
 See: `docs/job_queue_strategy.md`.
