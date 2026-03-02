@@ -9,7 +9,7 @@ imagehash==4.3.2
 beautifulsoup4==4.13.4
 python-dateutil==2.9.0.post0
 reportlab==4.4.3
-yt-dlp==2026.2.11
+yt-dlp==2026.2.21
 pydantic-settings==2.10.1
 pytest==8.4.2
 pytest-asyncio==1.2.0
