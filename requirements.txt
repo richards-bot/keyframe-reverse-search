@@ -1,0 +1,12 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+python-multipart==0.0.20
+jinja2==3.1.6
+aiofiles==24.1.0
+httpx==0.28.1
+Pillow==11.3.0
+imagehash==4.3.2
+beautifulsoup4==4.13.4
+python-dateutil==2.9.0.post0
+reportlab==4.4.3
+yt-dlp==2026.2.11

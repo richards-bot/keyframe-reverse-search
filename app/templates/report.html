@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Report {{ submission.id }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Report</h1>
+    <p><b>ID:</b> {{ submission.id }}</p>
+    <p><b>Status:</b> {{ submission.status }}</p>
+    <p>
+      <a href="/api/submissions/{{ submission.id }}/export.json">Export JSON</a> |
+      <a href="/api/submissions/{{ submission.id }}/export.pdf">Export PDF</a>
+    </p>
+
+    <h2>Earliest known matches</h2>
+    <ul>
+    {% for m in submission.earliestKnownMatches or [] %}
+      <li>[{{m.engine}}] {{m.publishedAt or 'unknown'}} — <a href="{{m.url}}" target="_blank">{{m.url}}</a></li>
+    {% endfor %}
+    </ul>
+
+    <h2>Frames</h2>
+    <div class="grid">
+    {% for fr in submission.frameResults or [] %}
+      <div class="card">
+        <img src="{{ fr.frame.relativePath }}" alt="frame" />
+        <small>{{ fr.frame.filename }}</small>
+      </div>
+    {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

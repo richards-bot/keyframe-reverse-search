@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Keyframe Reverse Search</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Keyframe Reverse Search</h1>
+    <p>Paste a video URL or upload a file.</p>
+
+    <form id="submit-form" enctype="multipart/form-data">
+      <label>Video URL</label>
+      <input type="url" name="url" placeholder="https://..." />
+
+      <label>or Upload file</label>
+      <input type="file" name="file" accept="video/*" />
+
+      <button type="submit">Analyze</button>
+    </form>
+
+    <section id="status"></section>
+  </main>
+
+<script>
+const form = document.getElementById('submit-form');
+const statusEl = document.getElementById('status');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = new FormData(form);
+  statusEl.textContent = 'Submitting...';
+  const res = await fetch('/api/submissions', {method:'POST', body});
+  const data = await res.json();
+  if (!res.ok) { statusEl.textContent = data.detail || 'Error'; return; }
+
+  const id = data.id;
+  statusEl.innerHTML = `Submission ${id} queued...`;
+
+  const poll = async () => {
+    const r = await fetch(`/api/submissions/${id}`);
+    const s = await r.json();
+    statusEl.innerHTML = `Status: <b>${s.status}</b>`;
+    if (s.status === 'done') {
+      statusEl.innerHTML = `Done. <a href="/r/${id}">Open report</a>`;
+      return;
+    }
+    if (s.status === 'failed') {
+      statusEl.innerHTML = `Failed: ${s.error || 'unknown error'}`;
+      return;
+    }
+    setTimeout(poll, 2500);
+  };
+  setTimeout(poll, 1500);
+});
+</script>
+</body>
+</html>
