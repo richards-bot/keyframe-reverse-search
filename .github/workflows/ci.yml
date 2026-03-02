@@ -23,3 +23,11 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest -q
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t keyframe-reverse-search:ci .
