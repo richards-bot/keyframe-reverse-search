@@ -111,3 +111,6 @@ See: `docs/job_queue_strategy.md`.
 - Yandex does not provide a stable official reverse-image API; current adapter is a pragmatic bridge path.
 - Earliest publication date is evidence-based inference and should be presented with confidence levels.
 - Filesystem submission storage should migrate to object storage + DB for large-scale use.
+
+## No-key fallback mode
+If no reverse-search API keys are configured, reports still include per-frame manual links (Google Lens, Yandex, Bing) so investigations can continue without paid API access.
